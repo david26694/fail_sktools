@@ -20,9 +20,8 @@ from lightgbm import LGBMRegressor
 
 
 from sktools import QuantileEncoder, TypeSelector
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.ensemble import RandomForestRegressor
-from category_encoders.m_estimate import MEstimateEncoder
+from category_encoders import MEstimateEncoder, TargetEncoder, \
+    CatBoostEncoder, CountEncoder, OrdinalEncoder
 from tabulate import tabulate
 from pathlib import Path
 
@@ -89,12 +88,16 @@ for i, data_i in enumerate(data):
     scaler = StandardScaler()
     lm = ElasticNet()
     rf = LGBMRegressor(n_estimators=50)
-    te = MEstimateEncoder(cols=cols_enc[i])
+    me = MEstimateEncoder(cols=cols_enc[i])
+    te = TargetEncoder(cols=cols_enc[i])
+    cat_e = CatBoostEncoder(cols=cols_enc[i])
+    # ce = CountEncoder(cols=cols_enc[i])
+    oe = OrdinalEncoder(cols=cols_enc[i])
     pe = QuantileEncoder(cols=cols_enc[i], quantile=0.50)
     se = SummaryEncoder(cols=cols_enc[i], quantiles=[0.25, 0.50, 0.75], m=100)
 
-    encoders = {"te": te, "pe": pe}
-    learners = {"lm": lm, "rf": rf}
+    encoders = {"pe": pe, "me": me, "cat_e": cat_e, "te": te, "oe": oe}
+    learners = {"lm": lm}
 
     for learner_name, learner in learners.items():
 
@@ -193,45 +196,11 @@ for i, data_i in enumerate(data):
                 )
             )
 
-            if encoder_name != "te":
+            # if encoder_name == "te":
+            #
+            #     pvalue = compare_results(
+            #         results_dict[data_i][learner_name]["te"]["grid_results"],
+            #         results_dict[data_i][learner_name][encoder_name]["grid_results"],
+            #     )
+            #     print(f"p-value of wilcoxon test with {encoder_name}: {pvalue}")
 
-                pvalue = compare_results(
-                    results_dict[data_i][learner_name]["te"]["grid_results"],
-                    results_dict[data_i][learner_name][encoder_name]["grid_results"],
-                )
-                print(f"p-value of wilcoxon test with {encoder_name}: {pvalue}")
-
-    # Add Results
-    resultados.append(
-        [
-            data_i.split("/")[1],
-            # Scores
-            results_dict[data_i]["lm"]["te"]["train_mae"],
-            results_dict[data_i]["lm"]["te"]["test_mae"],
-            results_dict[data_i]["lm"]["te"]["train_mse"],
-            results_dict[data_i]["lm"]["te"]["test_mse"],
-            results_dict[data_i]["lm"]["pe"]["train_mae"],
-            results_dict[data_i]["lm"]["pe"]["test_mae"],
-            results_dict[data_i]["lm"]["pe"]["train_mse"],
-            results_dict[data_i]["lm"]["pe"]["test_mse"],
-            results_dict[data_i]["rf"]["te"]["train_mae"],
-            results_dict[data_i]["rf"]["te"]["test_mae"],
-            results_dict[data_i]["rf"]["te"]["train_mse"],
-            results_dict[data_i]["rf"]["te"]["test_mse"],
-            results_dict[data_i]["rf"]["pe"]["train_mae"],
-            results_dict[data_i]["rf"]["pe"]["test_mae"],
-            results_dict[data_i]["rf"]["pe"]["train_mse"],
-            results_dict[data_i]["rf"]["pe"]["test_mse"],
-            # Shape
-            df.shape,
-            # params
-            "",
-            "",
-            # Time
-            elapsed_time_mins(tic, time.time()),
-        ]
-    )
-
-
-resultados = pd.DataFrame(resultados, columns=columns)
-resultados.to_csv("./results_regression/resultados.csv", index=False)
