@@ -94,9 +94,9 @@ for i, data_i in enumerate(data):
     # ce = CountEncoder(cols=cols_enc[i])
     oe = OrdinalEncoder(cols=cols_enc[i])
     pe = QuantileEncoder(cols=cols_enc[i], quantile=0.50)
-    se = SummaryEncoder(cols=cols_enc[i], quantiles=[0.25, 0.50, 0.75], m=100)
+    se = SummaryEncoder(cols=cols_enc[i], quantiles=[0.4, 0.5, 0.6])
 
-    encoders = {"pe": pe, "me": me, "cat_e": cat_e, "te": te, "oe": oe}
+    encoders = {"se": se, "me": me, "pe": pe}
     learners = {"lm": lm}
 
     for learner_name, learner in learners.items():
@@ -118,13 +118,6 @@ for i, data_i in enumerate(data):
                 ]
             )
 
-            if "MEstimateEncoder" in str(encoder):
-                pipe_grid = {"enc__m": [0, 1, 10, 50]}
-            else:
-                pipe_grid = {
-                    "enc__m": [0, 1, 10, 50],
-                    "enc__quantile": [0.25, 0.50, 0.75],
-                }
             pipe_grid = {}
 
             # Train model
