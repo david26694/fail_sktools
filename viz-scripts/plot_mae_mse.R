@@ -31,7 +31,18 @@ relative_errors <- cv_results %>%
   mutate(
     improvement_qe = if_else(relative_error > 0, 'QE beats TE', 'TE beats QE'),
     metric = stringr::str_to_upper(metric)
+    ) %>% 
+  filter(data != 'house_kaggle') %>% 
+  mutate(
+    data = case_when(
+      data == 'cauchy' ~ 'Cauchy',
+      data == 'ks' ~ 'Kickstarter Projects',
+      data == 'so2019' ~ 'StackOverflow 2019',
+      data == 'stackoverflow' ~ 'StackOverflow 2018',
+      data == 'medical_payments_sample' ~ 'Medical Payments'
     )
+  )
+
   
 ordered_data <- relative_errors %>% 
   filter(metric == 'MAE') %>% 
@@ -48,8 +59,14 @@ relative_errors %>%
   xlab('Dataset') + 
   ylab('Relative error difference (%)') +
   labs(fill = '') + 
-  ggtitle('Relative error difference between QE and TE',
-          'Difference for several datasets in test MAE and MSE') +
+  xlab("") + 
+  ylab("") + 
+  theme(
+    text = element_text(size = 15),
+    axis.text.x = element_text(size = 10)
+  ) + 
+  # ggtitle('Relative error difference between QE and TE',
+  #         'Difference for several datasets in test MAE and MSE') +
   ggsave("results_regression/mae_mse_differences.png", width = 10, height = 8)
 
 

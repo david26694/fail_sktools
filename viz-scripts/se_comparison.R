@@ -21,6 +21,18 @@ cv_long <- cv_results %>%
     data = stringr::str_remove_all(data, '.csv')
   )
 
+cv_long <- cv_long %>% 
+  filter(data != 'house_kaggle') %>% 
+  mutate(
+    data = case_when(
+      data == 'cauchy' ~ 'Cauchy',
+      data == 'ks' ~ 'Kickstarter Projects',
+      data == 'so2019' ~ 'StackOverflow 2019',
+      data == 'stackoverflow' ~ 'StackOverflow 2018',
+      data == 'medical_payments_sample' ~ 'Medical Payments'
+    )
+  )
+
 cv_long %>% count(encoder)
 
 cv_long <- cv_long %>% 
@@ -51,5 +63,10 @@ cv_long %>%
                 width = .2,
                 position = position_dodge(.9)) +
   facet_wrap(~data, scales = 'free_y') +
-  ylab('Cross validation MAE') + 
+  theme(
+    text = element_text(size = 15),
+    axis.text.x = element_text(size = 10)
+  ) + 
+  ylab('') + 
+  xlab('') + 
   ggsave('results_regression/summary_compare.png', width = 12, height = 9)
