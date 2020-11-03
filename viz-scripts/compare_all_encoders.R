@@ -22,6 +22,7 @@ cv_long <- cv_results %>%
   )
 
 cv_long %>% count(encoder)
+cv_long %>% count(data)
 
 cv_long <- cv_long %>% 
   filter(data != 'house_kaggle') %>% 
@@ -32,6 +33,13 @@ cv_long <- cv_long %>%
       encoder == 'oe' ~ 'Ordinal',
       encoder == 'pe' ~ 'Quantile',
       encoder == 'te' ~ 'Target'
+    ),
+    data = case_when(
+      data == 'cauchy' ~ 'Cauchy',
+      data == 'ks' ~ 'Kickstarter Projects',
+      data == 'so2019' ~ 'StackOverflow 2019',
+      data == 'stackoverflow' ~ 'StackOverflow 2018',
+      data == 'medical_payments_sample' ~ 'Medical Payments'
     )
   )
 
@@ -53,8 +61,10 @@ cv_long %>%
                 width = .2,
                 position = position_dodge(.9)) +
   facet_wrap(~data, scales = 'free_y') +
-  ylab('Cross validation MAE') + 
-  ggtitle(
-    "Comparison of several encoding techniques"
-  ) +
+  theme(
+    text = element_text(size = 15),
+    axis.text.x = element_text(size = 10)
+    ) + 
+  ylab('') + 
+  xlab('') +
   ggsave('results_regression/lm_categorical_compare.png', width = 12, height = 9)
