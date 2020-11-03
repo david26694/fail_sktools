@@ -20,6 +20,26 @@ cv_long <- cv_results %>%
     data = stringr::str_remove_all(data, '.csv')
   )
 
+cv_long <- cv_long %>% 
+  filter(data != 'house_kaggle') %>% 
+  mutate(
+    encoder = case_when(
+      encoder == 'cat_e' ~ 'Catboost',
+      encoder == 'me' ~ 'M-estimate',
+      encoder == 'oe' ~ 'Ordinal',
+      encoder == 'pe' ~ 'Quantile',
+      encoder == 'te' ~ 'Target'
+    ),
+    data = case_when(
+      data == 'cauchy' ~ 'Cauchy',
+      data == 'ks' ~ 'Kickstarter Projects',
+      data == 'so2019' ~ 'StackOverflow 2019',
+      data == 'stackoverflow' ~ 'StackOverflow 2018',
+      data == 'medical_payments_sample' ~ 'Medical Payments'
+    )
+  )
+
+
 cv_long %>% 
   ggplot(aes(x = test_score, fill = encoder, color = encoder)) + 
   geom_density(alpha = 0.3) +
@@ -79,10 +99,15 @@ score_diffs %>%
   geom_rug() + 
   geom_vline(aes(xintercept = 0, color = 'No difference')) +
   facet_wrap(~data, scales = 'free', ncol = 2) + 
-  xlab('Cross validation difference') + 
+  xlab('') + 
+  ylab('') + 
   labs(colour = '') + 
-  ggtitle("Linear model cross-validation results", 
-          "Score difference between target and quantile encodings \nPositive differences indicate quantile method being better") +
+  theme(
+    text = element_text(size = 15),
+    axis.text.x = element_text(size = 10)
+  ) + 
+  # ggtitle("Linear model cross-validation results", 
+  #         "Score difference between target and quantile encodings \nPositive differences indicate quantile method being better") +
   ggsave("results_regression/lm_cv_differences.png")
   
 score_diffs %>% 
