@@ -5,7 +5,7 @@ library(xtable)
 
 theme_set(theme_minimal())
 
-cv_results <- read.csv('results_regression/cv_results_many_encoding.csv')
+cv_results <- read.csv('results_regression/cv_results_21.csv')
 
 cv_long <- cv_results %>% 
   pivot_longer(
@@ -32,7 +32,9 @@ cv_long <- cv_long %>%
       encoder == 'me' ~ 'M-estimate',
       encoder == 'oe' ~ 'Ordinal',
       encoder == 'pe' ~ 'Quantile',
-      encoder == 'te' ~ 'Target'
+      encoder == 'te' ~ 'Target',
+      encoder == 'js' ~ 'James-Stein',
+      encoder == 'stats_e' ~ 'Mixed models',
     ),
     data = case_when(
       data == 'cauchy' ~ 'Cauchy',
@@ -41,9 +43,10 @@ cv_long <- cv_long %>%
       data == 'stackoverflow' ~ 'StackOverflow 2018',
       data == 'medical_payments_sample' ~ 'Medical Payments'
     )
-  )
+  ) %>% 
+  filter(!is.na(encoder))
 
-levels <- c('Quantile', 'Catboost', 'M-estimate', 'Target', 'Ordinal')
+levels <- c('Quantile', 'Catboost', 'M-estimate', 'James-Stein', 'Mixed models', 'Target', 'Ordinal')
 
 cv_long$encoder <- factor(cv_long$encoder, levels = levels)
 
@@ -67,4 +70,4 @@ cv_long %>%
     ) + 
   ylab('') + 
   xlab('') +
-  ggsave('results_regression/lm_categorical_compare.png', width = 12, height = 9)
+  ggsave('results_regression/lm_categorical_compare.png', width = 20, height = 9)

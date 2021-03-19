@@ -110,6 +110,15 @@ score_diffs %>%
   #         "Score difference between target and quantile encodings \nPositive differences indicate quantile method being better") +
   ggsave("results_regression/lm_cv_differences.png")
   
+
+score_diffs %>% 
+  filter(learner == 'lm', !grepl('house', data)) %>% 
+  group_by(learner, data) %>% 
+  summarise(
+    prob_positive = sum(score_difference > 0) / n()
+  )
+
+
 score_diffs %>% 
   filter(learner == 'lg', !grepl('house', data)) %>% 
   ggplot(aes(x = score_difference)) + 

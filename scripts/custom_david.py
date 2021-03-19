@@ -21,7 +21,7 @@ from lightgbm import LGBMRegressor
 
 from sktools import QuantileEncoder, TypeSelector
 from category_encoders import MEstimateEncoder, TargetEncoder, \
-    CatBoostEncoder, CountEncoder, OrdinalEncoder
+    CatBoostEncoder, CountEncoder, OrdinalEncoder, GLMMEncoder, JamesSteinEncoder
 from tabulate import tabulate
 from pathlib import Path
 
@@ -91,12 +91,22 @@ for i, data_i in enumerate(data):
     me = MEstimateEncoder(cols=cols_enc[i])
     te = TargetEncoder(cols=cols_enc[i])
     cat_e = CatBoostEncoder(cols=cols_enc[i])
-    # ce = CountEncoder(cols=cols_enc[i])
+    js = JamesSteinEncoder(cols=cols_enc[i])
+    stats_e = GLMMEncoder(cols=cols_enc[i])
     oe = OrdinalEncoder(cols=cols_enc[i])
     pe = QuantileEncoder(cols=cols_enc[i], quantile=0.50)
     se = SummaryEncoder(cols=cols_enc[i], quantiles=[0.4, 0.5, 0.6])
 
-    encoders = {"se": se, "me": me, "pe": pe}
+    encoders = {
+        "se": se,
+        "me": me,
+        "pe": pe,
+        "oe": oe,
+        "te": te,
+        "cat_e": cat_e,
+        "js": js,
+        "stats_e": stats_e
+    }
     learners = {"lm": lm}
 
     for learner_name, learner in learners.items():
@@ -155,7 +165,7 @@ for i, data_i in enumerate(data):
             cv_results["encoder"] = encoder_name
             cv_results["data"] = data_i
 
-            csv_file = Path("results_regression", "cv_results.csv")
+            csv_file = Path("results_regression", "cv_results_21.csv")
 
             if csv_file.exists():
                 cv_results.to_csv(csv_file, mode="a", header=False, index=False)
@@ -184,7 +194,7 @@ for i, data_i in enumerate(data):
             pd.DataFrame(
                 results_dict[data_i][learner_name][encoder_name]["grid_results"]
             ).to_csv(
-                "./results_regression/grid_results/{}_{}.csv".format(
+                "./results_regression/grid_results_21/{}_{}.csv".format(
                     f"{learner_name}_{encoder_name}_grid_results", data_i[5:10]
                 )
             )
